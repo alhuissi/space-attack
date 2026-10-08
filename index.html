@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b10">
+  <meta name="description" content="Space Attack — a fast, original browser arcade shooter. Move, fire, and hold the line.">
+  <title>Space Attack — Arcade 001</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="engine.js"></script>
+  <script defer src="renderer.js"></script>
+  <script defer src="game.js"></script>
+</head>
+<body>
+  <main class="arcade">
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="Space Attack home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        SPACE ATTACK<span class="brand-dot" aria-hidden="true">.</span>
+      </a>
+      <span class="edition">BROWSER ARCADE <span class="edition-slash">/</span> 001</span>
+    </header>
+
+    <section class="game-shell" aria-label="Space Attack arcade game">
+      <div class="instrument-panel">
+        <div class="readout score-readout">
+          <span class="readout-label">SCORE</span>
+          <output id="score" class="readout-value">000000</output>
+        </div>
+        <div class="readout best-readout">
+          <span class="readout-label">BEST</span>
+          <output id="best" class="readout-value dim-value">000000</output>
+        </div>
+        <div class="readout wave-readout">
+          <span class="readout-label">WAVE</span>
+          <output id="wave" class="readout-value">01</output>
+        </div>
+        <div class="readout lives-readout">
+          <span class="readout-label">LIVES</span>
+          <div id="lives" class="lives" aria-label="3 lives remaining">
+            <span class="life" aria-hidden="true"></span>
+            <span class="life" aria-hidden="true"></span>
+            <span class="life" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="panel-actions">
+          <button id="pause-button" class="icon-button" type="button" aria-label="Pause game" title="Pause / resume (P)">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 4v12M14 4v12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+          </button>
+          <button id="mute-button" class="icon-button" type="button" aria-label="Mute sound" aria-pressed="false" title="Toggle sound (M)">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7h3l4-3v12l-4-3H3zM13 7c2 1.6 2 4.4 0 6M15.5 4.5c4 3 4 8 0 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="playfield">
+        <canvas id="game-canvas" width="960" height="640" tabindex="0" aria-label="Space Attack playfield. Move with W A S D or arrow keys, hold Space to fire, press P to pause, and M to mute."></canvas>
+        <div id="start-screen" class="screen-overlay start-screen">
+          <div class="screen-content">
+            <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> HOSTILE SIGNAL DETECTED</p>
+            <h1>SPACE<br><span>ATTACK</span></h1>
+            <p class="screen-description">One ship. Endless waves.<br>Hold the line.</p>
+            <button id="start-button" class="primary-button" type="button">START MISSION <span aria-hidden="true">↗</span></button>
+            <p class="launch-hint">OR PRESS <kbd>ENTER</kbd></p>
+            <div class="start-controls" aria-label="Game controls">
+              <span><b>WASD</b> / <b>↑ ↓ ← →</b> MOVE</span>
+              <span><b>SPACE</b> FIRE</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="gameover-screen" class="screen-overlay gameover-screen" hidden>
+          <div class="screen-content">
+            <p class="eyebrow">TRANSMISSION LOST</p>
+            <h2>MISSION<br><span>OVER</span></h2>
+            <div class="mission-result">
+              <div><span class="readout-label">FINAL SCORE</span><output id="final-score">000000</output></div>
+              <div><span class="readout-label">WAVE REACHED</span><output id="final-wave">01</output></div>
+            </div>
+            <button id="restart-button" class="primary-button" type="button">TRY AGAIN <span aria-hidden="true">↗</span></button>
+            <p class="launch-hint">OR PRESS <kbd>ENTER</kbd></p>
+          </div>
+        </div>
+
+        <div id="pause-screen" class="screen-overlay pause-screen" hidden>
+          <div class="screen-content">
+            <p class="eyebrow">FLIGHT ON HOLD</p>
+            <h2>PAUSED<span class="title-dot">.</span></h2>
+            <p class="screen-description">Take a breath. The stars can wait.</p>
+            <button id="resume-button" class="primary-button" type="button">RESUME MISSION <span aria-hidden="true">↗</span></button>
+            <p class="launch-hint">OR PRESS <kbd>P</kbd></p>
+          </div>
+        </div>
+
+        <div id="wave-banner" class="wave-banner" hidden aria-live="polite">
+          <span id="wave-banner-title">WAVE 01</span>
+          <span id="wave-banner-subtitle">INCOMING FORMATION</span>
+        </div>
+        <span class="field-corner corner-top-left" aria-hidden="true"></span>
+        <span class="field-corner corner-top-right" aria-hidden="true"></span>
+        <span class="field-corner corner-bottom-left" aria-hidden="true"></span>
+        <span class="field-corner corner-bottom-right" aria-hidden="true"></span>
+      </div>
+
+      <footer class="game-footer">
+        <div class="controls" aria-label="Keyboard controls">
+          <span><kbd>WASD</kbd><span class="control-or">/</span><kbd>↑ ↓ ← →</kbd> MOVE</span>
+          <span><kbd>SPACE</kbd> FIRE</span>
+          <span><kbd>P</kbd> PAUSE</span>
+          <span><kbd>M</kbd> SOUND</span>
+        </div>
+        <p id="status" class="status" aria-live="polite"><span class="status-dot" aria-hidden="true"></span> AWAITING PILOT</p>
+      </footer>
+    </section>
+
+    <footer class="site-footer"><span>STAY SHARP. KEEP MOVING.</span><span>THREE LIVES. NO SECOND CHANCES.</span></footer>
+  </main>
+</body>
+</html>
