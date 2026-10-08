@@ -24,7 +24,7 @@ I have a two-hour total active-work limit, including my playtesting and reflecti
 
 Briefly state your implementation plan, then build it. Check the full start → play → game over → restart flow, and report what you verified and any known issues. I will personally playtest it afterward.
 
-Save this exact prompt and each subsequent user prompt in prompts.md. Record your work’s start/end timestamps. Include a short README with run instructions and controls.
+Save this exact prompt and each subsequent user prompt in prompts.md. Record your work’s start/end timestamps. Include a short README with run instructions and controls.&#x20;
 
 
 

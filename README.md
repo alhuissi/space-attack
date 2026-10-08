@@ -36,4 +36,4 @@ The game pauses when its tab is hidden or focus is lost. Resume when you're read
 
 ## Checks
 
-If Node.js is available, run `node --test tests/engine.test.js` for the dependency-free simulation tests. Node.js is not needed to play.
+If Node.js is available, run `node --test tests/*.test.js` for the dependency-free simulation and browser-controller tests. Node.js is not needed to play.
