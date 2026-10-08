@@ -18,11 +18,13 @@ Then open [http://localhost:8000](http://localhost:8000). No installation or bui
 - **Hold Space:** fire.
 - **Enter:** start or restart.
 - **P / pause button:** pause or resume.
-- **M / sound button:** mute or unmute synthesized sounds.
+- **M / sound button:** mute or unmute synthesized effects and quiet background music.
 
 Destroy the formation to advance to the next wave. Coral ships award **150 points**, pink ships **100**, and ochre ships **75**. Enemy shots and ship collisions cost one of your three lives. After a hit, your ship flashes and briefly becomes invulnerable. Losing all lives ends the mission; restarting resets the score, wave, lives, and active objects.
 
-Wave 1 introduces aimed formation fire. From wave 2, pink hooked-wing ships signal a dive, commit to a swoop, then curve away and rejoin the formation. From wave 3, ochre heavy ships occasionally fire a narrow three-shot fan after a warning, followed by a longer cooldown. Later waves combine these attacks, with capped speeds, firing rates, and threats plus gaps between attacks. From wave 5, up to two divers can attack at once. Watch the warning cues and keep moving.
+Wave 1 introduces aimed formation fire. Later formations rotate through chevrons, diamonds, split wings, and crowns, with mixed enemy roles from wave 3. From wave 2, pink hooked-wing ships signal a dive, commit to a swoop, then curve away and rejoin the formation. From wave 3, ochre heavy ships occasionally fire a narrow three-shot fan after a warning, followed by a longer cooldown. Later waves combine these attacks, with capped speeds, firing rates, and threats plus gaps between attacks. From wave 5, up to two divers can attack at once. Watch the warning cues and keep moving.
+
+The first mint **II** capsule drops after three shooting kills, followed by occasional drops. Fly into a capsule for **10 seconds of twin fire** using the same Space control. The timer turns amber for the final three seconds, then standard fire returns. Capsules survive wave transitions, and another capsule refreshes the timer.
 
 The game pauses when its tab is hidden or focus is lost. Resume when you're ready. Gameplay keys do not scroll the page. Best score is kept locally when browser storage is available.
 

@@ -63,5 +63,25 @@ The first complete playable version was running by approximately **13:38 +08:00*
 ## Combat feedback, wave variety, and twin-shot polish
 
 - Start: **2026-10-08 14:25:44 +08:00** (2026-10-08 06:25:44 UTC).
-- End: pending.
+- End of implementation and verification: **2026-10-08 14:44:54 +08:00** (2026-10-08 06:44:54 UTC), about **19 minutes** of active work.
 - Scope: distinct synthesized feedback, restrained visual effects, varied wave compositions and paced difficulty, one temporary twin-shot pickup, focused tests and browser inspection. Optional procedural music follows the required work; deployment and reflection remain for the user-requested next steps.
+
+### Changed
+
+- Ordinary, diver, and spread-shooter kills have distinct synthesized contours and filtered noise layers. Damage and wave completion have their own cues. Small pitch, duration, and volume variations keep repeated shots and explosions from sounding identical. All audio uses the same master mute control.
+- Short single/twin muzzle flashes, colored impact cores and shards, a restrained damage edge flash, and small weapon cues preserve the existing ships, palette, controls, and readable projectiles. Effects remain bounded and do not delay input.
+- Wave 1 retains its introductory formation. Later waves rotate through chevron, diamond, split-wing, and crown layouts, with mixed roles from wave 3. Dive introductions arrive sooner, but dives cap at 300 pixels/second and bullets at 235. Spread attacks leave a 1.05-second recovery gap. Warnings, finite firing intervals, stable formation slots, returning divers, and the two-diver ceiling remain intact.
+- A mint outlined **II** capsule drifts downward. The first drop is guaranteed on the third shooting kill; later drops have a 14% chance with a six-second cooldown and at most two live capsules. Collection grants or refreshes ten seconds of parallel twin fire at the existing firing cadence. A visible countdown, final-three-second amber cue, activation/ending/expiration sounds, and a return-to-standard-fire notice explain the state. Pickups remain collectible during wave transitions; restart clears all drop counters, pickups, weapon timers, and feedback.
+- Added the optional quiet, six-second procedural music motif. It follows game time, stays below effects, cancels voices on mute/pause/restart, resumes without a queued backlog, and stops on game over while its ending cue plays. No sampled assets, dependencies, or deployment were added.
+
+### Verified
+
+- `node --test tests/*.test.js`: **65 passed, 0 failed** — all 46 existing tests plus 13 power-up tests, five audio lifecycle tests, and one layout/progression test. New coverage includes guaranteed/capped drops, relative swept collection, twin firing cadence, two bullets hitting one enemy without duplicate scoring, two independent kills, timer refresh/expiration, collection through a wave gap, pause freezing, restart cleanup, master mute routing, delayed-note cancellation, music suspension, and distinct kill contours. Existing live-diver wave completion, damage immunity, return paths, bounds, and controller tests remain green.
+- All three production JavaScript files passed `node --check`; `git diff --check` passed.
+- Personally inspected the actual renderer in the browser and played short wave 2 and wave 5 runs with normal lives. Movement allowed dodging committed attacks; the later run added pressure without crowding the field. The browser showed scoring, paired shots, capsule collection, the duration display, damage, expiry back to standard fire, game over with final score 975, and restart with score zero, three lives, and no active weapon or diver. The temporary QA fixture selected later waves and deliberately supplied one demonstration capsule; it was removed afterward.
+- Pause froze the displayed twin duration and pickup state; resume continued it. Mute/unmute updated correctly, and audio lifecycle tests cover every layer. No browser warnings or errors were observed. The normal game is left on its start screen with the user's best score preserved.
+- Saved a presentation preview outside the project. README instructions describe the pickup and music; the exact request is in prompts.md. Changes are recorded in focused commits.
+
+### Remaining
+
+- All requested features, including optional music, are implemented. No known gameplay blockers. The audio mix was checked structurally and through browser execution, but its perceived sound was not auditioned. Subjective balance, audio preferences, and reflection remain with the user. Deployment was left for the next step.
