@@ -89,5 +89,14 @@ The first complete playable version was running by approximately **13:38 +08:00*
 ## Codex Sites deployment
 
 - Start: **2026-10-08 14:46:28 +08:00** (2026-10-08 06:46:28 UTC).
-- End: pending.
+- End of deployment and verification: **2026-10-08 14:50:17 +08:00** (2026-10-08 06:50:17 UTC).
 - Scope: publish the finished game through Codex Sites, verify deployment status, and document reviewer access without changing the audience or inviting anyone.
+
+### Published and verified
+
+- Hosted URL: **https://space-attack-arcade.luckyswift.chatgpt.site**.
+- Native Sites deployment status: **succeeded**. The Site's current live URL matches the successful deployment URL.
+- Published source commit: `70a55213f4179301217c095d67ecb52e2a94a38f`. The official workflow verified the push and packaged that source. Deployment ID: `appgdep_6ac73cec26308191a8ff12be5f06d4f3`.
+- Static archive contains only index.html, styles.css, engine.js, renderer.js, game.js, and the required hosting manifest. Prompts, tests, and work notes are not served. No gameplay changes were made; the existing 65-test verification remains applicable. The new staging script passed syntax checks, and whitespace checks passed.
+- Access remains private to the owner: custom mode, one permitted owner, no external viewers. External viewer invitations are enabled; custom and public audiences are available. The user can request viewer invitations for reviewer emails, whose accounts must sign in, or explicitly request public link access. No invitations were sent and no audience change was made.
+- Exact deployment request saved in prompts.md. README records the hosted URL and reviewer instructions. These final documentation notes are recorded after the published source commit; playable assets are unchanged.
