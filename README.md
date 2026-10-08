@@ -48,4 +48,4 @@ Hosted game: [Space Attack](https://space-attack-arcade.luckyswift.chatgpt.site)
 
 `.openai/hosting.json` retains the Site identity. `node scripts/stage-site.mjs` copies the five playable assets into `dist/` for static hosting; this is only deployment preparation, and local play still needs no build.
 
-The Site starts private to its owner. To give reviewers access, request viewer invitations for their email addresses; they open the hosted URL and sign in with the invited account. To allow anyone with the URL to play, explicitly request public access. Sharing the URL alone does not grant access to a private Site.
+The Site is public. Reviewers can open the hosted URL and play without an invitation or sign-in. Access can be restricted again on request.

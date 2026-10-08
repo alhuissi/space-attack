@@ -95,3 +95,7 @@ Make small, focused commits and save this exact prompt in prompts.md. Report com
 ## Prompt 4 — 2026-10-08
 
 Now deploy to Codex sites, return the hosted URL and explain how to give the reviewers access. Save this prompt in prompts.md.
+
+## Prompt 5 — 2026-10-08
+
+Make it public and give me the URL.

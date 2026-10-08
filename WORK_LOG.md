@@ -100,3 +100,10 @@ The first complete playable version was running by approximately **13:38 +08:00*
 - Static archive contains only index.html, styles.css, engine.js, renderer.js, game.js, and the required hosting manifest. Prompts, tests, and work notes are not served. No gameplay changes were made; the existing 65-test verification remains applicable. The new staging script passed syntax checks, and whitespace checks passed.
 - Access remains private to the owner: custom mode, one permitted owner, no external viewers. External viewer invitations are enabled; custom and public audiences are available. The user can request viewer invitations for reviewer emails, whose accounts must sign in, or explicitly request public link access. No invitations were sent and no audience change was made.
 - Exact deployment request saved in prompts.md. README records the hosted URL and reviewer instructions. These final documentation notes are recorded after the published source commit; playable assets are unchanged.
+
+## Public reviewer access
+
+- Start: **2026-10-08 14:51:53 +08:00** (2026-10-08 06:51:53 UTC).
+- End of change and verification: **2026-10-08 14:52:19 +08:00** (2026-10-08 06:52:19 UTC).
+- Changed the existing Site's audience to **public** at the user's explicit request. The native access update succeeded, and a separate readback confirmed public access, active status, and the unchanged live URL: **https://space-attack-arcade.luckyswift.chatgpt.site**.
+- Anyone with the URL can play without invitations or sign-in. Gameplay and the deployment version are unchanged. Saved the exact prompt in prompts.md and updated README access instructions.
