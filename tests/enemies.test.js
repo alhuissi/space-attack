@@ -51,6 +51,30 @@ test('wave two automatically introduces single divers without spread attacks', (
   assert.ok(states.has('returning'));
 });
 
+test('wave layouts vary while role combinations progress and stay within their caps', () => {
+  const names = new Set();
+  const signatures = new Set();
+  const first = playing();
+  assert.equal(first.layout, 'FORMATION');
+  assert.equal(first.enemies.length, 21);
+  assert.ok(first.enemies.every(enemy => enemy.role === 'formation'));
+  for (let wave = 2; wave <= 5; wave++) {
+    const game = playing(wave);
+    names.add(game.layout);
+    signatures.add(game.enemies.map(enemy => `${enemy.baseX},${enemy.baseY}`).join(';'));
+    assert.equal(game.formation.total, game.enemies.length);
+    assert.ok(game.enemies.length > 0 && game.enemies.length <= 24);
+    assert.ok(game.enemies.some(enemy => enemy.role === 'formation'));
+    assert.ok(game.enemies.some(enemy => enemy.role === 'diver'));
+    assert.equal(game.enemies.some(enemy => enemy.role === 'spread'), wave >= 3);
+    assert.ok(game.enemies.every(enemy => enemy.y < 355), 'new formations enter above the movement area');
+    assert.equal(new Set(game.enemies.map(enemy => `${enemy.baseX},${enemy.baseY}`)).size, game.enemies.length);
+    assert.equal(game.difficulty.maxDivers, wave < 5 ? 1 : 2);
+  }
+  assert.equal(names.size, 4);
+  assert.equal(signatures.size, 4);
+});
+
 test('dive warnings reserve a slot and higher waves have a finite simultaneous cap', () => {
   for (const [wave, expectedCap] of [[2, 1], [5, 2], [10000, 2]]) {
     const game = playing(wave);

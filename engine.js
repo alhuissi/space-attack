@@ -59,11 +59,18 @@
       this.wave = 1;
       this.lives = 3;
       this.time = 0;
-      this.player = { x: WIDTH / 2, y: 574, radius: 12, invulnerable: 0, shotCooldown: 0 };
+      this.player = { x: WIDTH / 2, y: 574, radius: 12, invulnerable: 0, shotCooldown: 0, twinTimer: 0, muzzleFlash: 0, damageFlash: 0 };
       this.playerBullets = [];
       this.enemyBullets = [];
+      this.pickups = [];
+      this.killCount = 0;
+      this.firstPickupDropped = false;
+      this.dropCooldown = 0;
+      this.weaponNotice = null;
       this.particles = [];
       this.rings = [];
+      this.flashes = [];
+      this.damageFlash = 0;
       this.events = [];
       this.shake = 0;
       this.nextWaveTimer = 0;
@@ -85,30 +92,36 @@
     spawnWave() {
       const level = this.wave - 1;
       this.difficulty = {
-        speed: Math.min(100, 36 + level * 6),
-        fireInterval: Math.max(0.8, 1.1 - level * 0.035),
-        bulletSpeed: Math.min(265, 185 + level * 7),
-        diveInterval: Math.max(3.6, 5.2 - Math.max(0, level - 1) * 0.25),
-        diveSpeed: Math.min(320, 235 + level * 7),
+        speed: Math.min(88, 36 + level * 5),
+        fireInterval: Math.max(0.9, 1.1 - level * 0.03),
+        bulletSpeed: Math.min(235, 185 + level * 5),
+        diveInterval: Math.max(3.8, 4.8 - Math.max(0, level - 1) * 0.18),
+        diveSpeed: Math.min(300, 235 + level * 6),
         maxDivers: this.wave < 2 ? 0 : this.wave < 5 ? 1 : 2,
-        spreadInterval: Math.max(4.8, 7.2 - Math.max(0, level - 2) * 0.35),
-        attackGap: Math.max(0.38, 0.55 - level * 0.0125),
+        spreadInterval: Math.max(4.8, 6.5 - Math.max(0, level - 2) * 0.25),
+        attackGap: Math.max(0.45, 0.6 - level * 0.0125),
       };
-      const rows = this.wave >= 4 ? 4 : 3;
-      this.formation = { x: 0, y: 0, direction: 1, total: rows * 7 };
+      const pattern = this.wave === 1 ? -1 : (this.wave - 2) % 4;
+      this.layout = ['CHEVRON', 'DIAMOND', 'SPLIT WINGS', 'CROWN'][pattern] || 'FORMATION';
+      const rows = pattern === 1 || pattern === 2 ? 4 : 3;
       this.enemies = [];
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < 7; col++) {
-          const baseX = WIDTH / 2 + (col - 3) * 72;
-          const baseY = 122 + row * 52;
-          const type = row % 3;
+          // Distinct silhouettes and gaps, rather than ever-denser rectangles.
+          if (pattern === 1 && Math.abs(col - 3) > [1, 2, 3, 2][row]) continue;
+          if (pattern === 2 && col === 3) continue;
+          if (pattern === 3 && row === 1 && (col === 0 || col === 6)) continue;
+          const baseX = WIDTH / 2 + (col - 3) * (pattern === 1 ? 68 : 72);
+          const baseY = pattern === -1 ? 122 + row * 52 : pattern === 0 ? 106 + row * 46 + Math.abs(col - 3) * 10 : pattern === 3 ? 102 + row * 50 + Math.abs(col - 3) * (row === 1 ? 0 : 10) : 106 + row * 48 + (pattern === 2 && col > 3 ? 12 : 0);
+          const type = this.wave <= 2 ? row % 3 : [0, 1, 0, 2, 1][(col + row * 2 + this.wave) % 5];
           const role = type === 1 && this.wave >= 2 ? 'diver' : type === 2 && this.wave >= 3 ? 'spread' : 'formation';
-          this.enemies.push({ x: baseX, y: baseY, baseX, baseY, width: 36, height: 26, row, col, type, role, alive: true, state: 'formation', attack: null, telegraph: 0, attackCooldown: 0, dive: null, heading: 0, trail: [] });
+          this.enemies.push({ x: baseX, y: baseY, baseX, baseY, width: 36, height: 26, row, col, type, role, alive: true, state: 'formation', attack: null, telegraph: 0, muzzleFlash: 0, attackCooldown: 0, dive: null, heading: 0, trail: [] });
         }
       }
-      this.fireTimer = 1.6;
-      this.diveTimer = 4.5;
-      this.spreadTimer = 6;
+      this.formation = { x: 0, y: 0, direction: 1, total: this.enemies.length };
+      this.fireTimer = this.wave === 1 ? 1.6 : 1.3;
+      this.diveTimer = this.wave === 2 ? 3.4 : 3.1;
+      this.spreadTimer = 5.2;
       this.attackGap = 0;
       this.pendingShooter = null;
       this.nextWaveTimer = 0;
@@ -122,23 +135,69 @@
         const angle = this.random() * Math.PI * 2;
         const speed = 40 + this.random() * 140;
         const life = 0.22 + this.random() * 0.3;
-        this.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life, maxLife: life, color, size: 1.5 + this.random() * 2 });
+        this.particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life, maxLife: life, color, size: 1.5 + this.random() * 2, kind: i % 3 === 0 ? 'shard' : 'spark', rotation: angle });
       }
       this.rings.push({ x, y, radius: 8, life: 0.3, maxLife: 0.3, color });
+      this.flashes.push({ x, y, radius: 12, life: 0.085, maxLife: 0.085, color });
+      if (this.particles.length > 180) this.particles.splice(0, this.particles.length - 180);
     }
 
     killEnemy(enemy) {
       if (!enemy.alive) return;
       enemy.alive = false;
       this.score += [150, 100, 75][enemy.type];
-      this.burst(enemy.x, enemy.y, '#ee967f');
-      this.events.push('kill');
+      const diver = enemy.role === 'diver';
+      const spread = enemy.role === 'spread';
+      this.burst(enemy.x, enemy.y, diver ? '#f2a4b5' : spread ? '#efce87' : '#ee967f', spread ? 18 : diver ? 15 : 12);
+      this.events.push(diver ? 'killDiver' : spread ? 'killSpread' : 'kill');
+      this.killCount++;
+      if (this.pickups.length < 2 && this.dropCooldown <= 0 && ((!this.firstPickupDropped && this.killCount >= 3) || (this.firstPickupDropped && this.random() < 0.14))) {
+        this.pickups.push({ x: clamp(enemy.x, 32, WIDTH - 32), y: Math.min(enemy.y, HEIGHT - 36), prevX: clamp(enemy.x, 32, WIDTH - 32), prevY: Math.min(enemy.y, HEIGHT - 36), vy: 62, radius: 14, kind: 'twin' });
+        this.firstPickupDropped = true;
+        this.dropCooldown = 6;
+      }
+    }
+
+    collectPickup(pickup) {
+      if (this.stage !== 'playing' || this.paused || pickup.dead || pickup.kind !== 'twin') return false;
+      pickup.dead = true;
+      this.player.twinTimer = 10;
+      this.weaponNotice = { text: 'TWIN SHOT ONLINE', life: 1.3, maxLife: 1.3 };
+      this.burst(this.player.x, this.player.y, '#85ddd4', 10);
+      this.events.push('powerup');
+      return true;
+    }
+
+    updateWeapon(dt) {
+      this.dropCooldown = Math.max(0, this.dropCooldown - dt);
+      const previous = this.player.twinTimer;
+      this.player.twinTimer = Math.max(0, previous - dt);
+      if (previous > 3 && this.player.twinTimer <= 3) {
+        this.weaponNotice = { text: 'TWIN SHOT FADING', life: 1, maxLife: 1 };
+        this.events.push('powerupEnding');
+      }
+      if (previous > 0 && this.player.twinTimer === 0) {
+        this.weaponNotice = { text: 'STANDARD FIRE', life: 1.1, maxLife: 1.1 };
+        this.events.push('powerupExpired');
+      }
+    }
+
+    updatePickups(dt) {
+      for (const pickup of this.pickups) {
+        pickup.prevX = pickup.x;
+        pickup.prevY = pickup.y;
+        pickup.y += pickup.vy * dt;
+        if (movingTargetHitTime(pickup, this.player, pickup.radius + this.player.radius) !== Infinity) this.collectPickup(pickup);
+      }
+      this.pickups = this.pickups.filter(pickup => !pickup.dead && pickup.y < HEIGHT + 24);
     }
 
     hitPlayer() {
       if (this.stage !== 'playing' || this.paused || this.player.invulnerable > 0) return false;
       this.lives--;
       this.player.invulnerable = 1.5;
+      this.player.damageFlash = 0.22;
+      this.damageFlash = 0.22;
       this.shake = 0.18;
       this.burst(this.player.x, this.player.y, '#efd078', 22);
       // A small clear zone leaves space to recover without erasing distant threats.
@@ -161,6 +220,7 @@
       this.waveBanner = Math.max(0, this.waveBanner - dt);
       this.player.invulnerable = Math.max(0, this.player.invulnerable - dt);
       this.player.shotCooldown = Math.max(0, this.player.shotCooldown - dt);
+      this.updateWeapon(dt);
       this.player.prevX = this.player.x;
       this.player.prevY = this.player.y;
       const dx = Number(Boolean(input.right)) - Number(Boolean(input.left));
@@ -168,9 +228,15 @@
       const length = Math.hypot(dx, dy) || 1;
       this.player.x = clamp(this.player.x + dx / length * 340 * dt, 28, WIDTH - 28);
       this.player.y = clamp(this.player.y + dy / length * 340 * dt, 410, HEIGHT - 30);
+      this.updatePickups(dt);
       if (input.fire && this.player.shotCooldown === 0) {
-        this.playerBullets.push({ x: this.player.x, y: this.player.y - 24, prevX: this.player.x, prevY: this.player.y - 24, vx: 0, vy: -720, radius: 3 });
+        for (const offset of this.player.twinTimer > 0 ? [-10, 10] : [0]) {
+          const x = this.player.x + offset;
+          const y = this.player.y - (offset === 0 ? 24 : 20);
+          this.playerBullets.push({ x, y, prevX: x, prevY: y, vx: 0, vy: -720, radius: 3 });
+        }
         this.player.shotCooldown = 0.145;
+        this.player.muzzleFlash = 0.06;
         this.events.push('shoot');
       }
 
@@ -287,7 +353,7 @@
       enemy.state = 'diving';
       enemy.telegraph = 0;
       enemy.dive.phaseTime = 0;
-      this.attackGap = Math.max(this.attackGap, 0.8);
+      this.attackGap = Math.max(this.attackGap, 0.85);
       this.fireTimer = Math.max(this.fireTimer, 0.65);
     }
 
@@ -375,10 +441,11 @@
             this.enemyBullets.push({ x: shooter.x, y: shooter.y + 16, prevX: shooter.x, prevY: shooter.y + 16, vx: Math.cos(aim + offset) * speed, vy: Math.sin(aim + offset) * speed, radius: 5 });
           }
           shooter.telegraph = 0;
+          shooter.muzzleFlash = 0.09;
           shooter.attack = null;
           shooter.attackCooldown = spread ? 3.6 : 0.8;
           this.pendingShooter = null;
-          this.attackGap = spread ? 0.95 : this.difficulty.attackGap;
+          this.attackGap = spread ? 1.05 : this.difficulty.attackGap;
           this.fireTimer = spread ? 1.4 : this.difficulty.fireInterval * (0.9 + this.random() * 0.2);
           if (spread) this.spreadTimer = this.difficulty.spreadInterval;
           this.events.push('enemyShoot');
@@ -416,6 +483,16 @@
 
     updateEffects(dt) {
       this.shake = Math.max(0, this.shake - dt);
+      this.damageFlash = Math.max(0, this.damageFlash - dt);
+      this.player.muzzleFlash = Math.max(0, this.player.muzzleFlash - dt);
+      this.player.damageFlash = Math.max(0, this.player.damageFlash - dt);
+      for (const enemy of this.enemies) enemy.muzzleFlash = Math.max(0, enemy.muzzleFlash - dt);
+      for (const flash of this.flashes) flash.life -= dt;
+      this.flashes = this.flashes.filter(flash => flash.life > 0);
+      if (this.weaponNotice) {
+        this.weaponNotice.life -= dt;
+        if (this.weaponNotice.life <= 0) this.weaponNotice = null;
+      }
       for (const particle of this.particles) {
         particle.life -= dt;
         particle.x += particle.vx * dt;
