@@ -164,8 +164,25 @@
     enemy(enemy, time) {
       const ctx = this.ctx;
       const type = enemy.type % 3;
+      const inFlight = enemy.state === 'diving' || enemy.state === 'returning';
+      if (inFlight && enemy.trail?.length) {
+        // Small fading segments show flight direction without hiding shots.
+        const points = [...enemy.trail, { x: enemy.x, y: enemy.y }];
+        ctx.strokeStyle = ENEMY_COLORS[type];
+        for (let i = 1; i < points.length; i++) {
+          if (Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y) > 90) continue;
+          ctx.globalAlpha = 0.06 + i / points.length * 0.2;
+          ctx.lineWidth = 0.5 + i / points.length * 1.5;
+          ctx.beginPath();
+          ctx.moveTo(points[i - 1].x, points[i - 1].y);
+          ctx.lineTo(points[i].x, points[i].y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
       ctx.save();
       ctx.translate(enemy.x, enemy.y);
+      if (inFlight) ctx.rotate(Math.sin(enemy.heading || 0) * 0.32);
       ctx.fillStyle = ENEMY_COLORS[type];
       if (type === 0) {
         polygon(ctx, [[-18, -5], [-11, -12], [-5, -6], [5, -6], [11, -12], [18, -5], [13, 5], [7, 5], [4, 13], [-4, 13], [-7, 5], [-13, 5]]);
@@ -193,7 +210,56 @@
       ctx.fillRect(-5, -9, 10, 1);
       ctx.fillStyle = `rgba(245, 144, 141, ${0.3 + Math.sin(time * 6 + enemy.col) * 0.1})`;
       ctx.fillRect(-2, 10, 4, 5);
+
+      // These cues appear only once the corresponding role is enabled.
+      ctx.strokeStyle = '#ffe3b6';
+      ctx.lineWidth = 1.6;
+      if (enemy.role === 'diver') {
+        ctx.beginPath();
+        ctx.moveTo(-4, 1);
+        ctx.lineTo(0, 5);
+        ctx.lineTo(4, 1);
+        ctx.stroke();
+        ctx.fillStyle = inFlight ? '#ffd2c3' : '#ad596c';
+        polygon(ctx, [[-3, -10], [0, inFlight ? -21 : -15], [3, -10]]);
+        ctx.fill();
+      } else if (enemy.role === 'spread') {
+        ctx.fillStyle = '#ffe3b6';
+        for (const [x, y] of [[-7, 8], [0, 11], [7, 8]]) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      if (enemy.telegraph > 0) this.enemyWarning(enemy, time);
       ctx.restore();
+    }
+
+    enemyWarning(enemy, time) {
+      const ctx = this.ctx;
+      const pulse = this.reducedMotion.matches ? 0.8 : 0.72 + Math.sin(time * 15) * 0.18;
+      ctx.strokeStyle = enemy.attack === 'dive' ? '#ffc3cc' : '#f4dab0';
+      ctx.globalAlpha = pulse;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (enemy.attack === 'dive' || enemy.state === 'diveWarning') {
+        ctx.arc(0, 0, 25, Math.PI * 0.88, Math.PI * 2.12);
+        for (const y of [20, 27]) {
+          ctx.moveTo(-5, y);
+          ctx.lineTo(0, y + 4);
+          ctx.lineTo(5, y);
+        }
+      } else if (enemy.attack === 'spread') {
+        for (const angle of [-0.5, 0, 0.5]) {
+          ctx.moveTo(Math.sin(angle) * 19, Math.cos(angle) * 19);
+          ctx.lineTo(Math.sin(angle) * 28, Math.cos(angle) * 28);
+        }
+        ctx.moveTo(-9, 17);
+        ctx.lineTo(0, 19);
+        ctx.lineTo(9, 17);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     playerBullet(bullet) {

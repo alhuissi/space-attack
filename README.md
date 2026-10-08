@@ -20,7 +20,9 @@ Then open [http://localhost:8000](http://localhost:8000). No installation or bui
 - **P / pause button:** pause or resume.
 - **M / sound button:** mute or unmute synthesized sounds.
 
-Destroy the formation to advance to the next wave. Each enemy awards points; movement and enemy fire gradually increase with sensible limits. Enemy shots and ship collisions cost one of your three lives. After a hit, your ship flashes and briefly becomes invulnerable. Losing all lives ends the mission; restarting resets the score, wave, lives, and active objects.
+Destroy the formation to advance to the next wave. Coral ships award **150 points**, pink ships **100**, and ochre ships **75**. Enemy shots and ship collisions cost one of your three lives. After a hit, your ship flashes and briefly becomes invulnerable. Losing all lives ends the mission; restarting resets the score, wave, lives, and active objects.
+
+Wave 1 introduces aimed formation fire. From wave 2, pink hooked-wing ships signal a dive, commit to a swoop, then curve away and rejoin the formation. From wave 3, ochre heavy ships occasionally fire a narrow three-shot fan after a warning, followed by a longer cooldown. Later waves combine these attacks, with capped speeds, firing rates, and threats plus gaps between attacks. From wave 5, up to two divers can attack at once. Watch the warning cues and keep moving.
 
 The game pauses when its tab is hidden or focus is lost. Resume when you're ready. Gameplay keys do not scroll the page. Best score is kept locally when browser storage is available.
 
