@@ -18,6 +18,8 @@
     constructor() {
       this.context = null;
       this.master = null;
+      this.voices = new Set();
+      this.musicStep = -1;
     }
 
     unlock() {
@@ -27,45 +29,133 @@
           if (!Audio) return;
           this.context = new Audio();
           this.master = this.context.createGain();
-          this.master.gain.value = muted ? 0 : 0.14;
+          this.master.gain.value = muted || game.paused ? 0 : 0.14;
           this.master.connect(this.context.destination);
+          this.noiseBuffer = this.context.createBuffer(1, Math.ceil(this.context.sampleRate * 0.4), this.context.sampleRate);
+          const samples = this.noiseBuffer.getChannelData(0);
+          for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
         }
         if (this.context.state === 'suspended') this.context.resume().catch(() => {});
       } catch (_) { /* The game also works when browser audio is unavailable. */ }
     }
 
-    tone(frequency, duration, type = 'sine', endFrequency = frequency, delay = 0, volume = 0.35) {
+    voice(source, duration, delay, volume, filter = null, music = false) {
+      const time = this.context.currentTime + delay;
+      const envelope = this.context.createGain();
+      envelope.gain.setValueAtTime(0.001, time);
+      envelope.gain.linearRampToValueAtTime(volume, time + 0.008);
+      envelope.gain.exponentialRampToValueAtTime(0.001, time + duration);
+      source.connect(filter || envelope);
+      if (filter) filter.connect(envelope);
+      envelope.connect(this.master);
+      const voice = { source, envelope, filter, music };
+      this.voices.add(voice);
+      source.onended = () => {
+        source.disconnect(); envelope.disconnect();
+        if (filter) filter.disconnect();
+        this.voices.delete(voice);
+      };
+      source.start(time);
+      source.stop(time + duration + 0.02);
+    }
+
+    tone(frequency, duration, type = 'sine', endFrequency = frequency, delay = 0, volume = 0.35, music = false) {
       if (!this.context || muted || game.paused) return;
       const time = this.context.currentTime + delay;
       const oscillator = this.context.createOscillator();
-      const envelope = this.context.createGain();
       oscillator.type = type;
       oscillator.frequency.setValueAtTime(frequency, time);
       oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, endFrequency), time + duration);
-      envelope.gain.setValueAtTime(0.001, time);
-      envelope.gain.linearRampToValueAtTime(volume, time + 0.005);
-      envelope.gain.exponentialRampToValueAtTime(0.001, time + duration);
-      oscillator.connect(envelope);
-      envelope.connect(this.master);
-      oscillator.start(time);
-      oscillator.stop(time + duration + 0.02);
-      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
+      this.voice(oscillator, duration, delay, volume, null, music);
+    }
+
+    noise(duration, cutoff, volume) {
+      if (!this.context || !this.noiseBuffer || muted || game.paused) return;
+      const source = this.context.createBufferSource();
+      source.buffer = this.noiseBuffer;
+      source.playbackRate.value = 0.94 + Math.random() * 0.12;
+      const filter = this.context.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = cutoff;
+      this.voice(source, duration, 0, volume, filter);
     }
 
     play(event) {
-      if (event === 'shoot') this.tone(880, 0.07, 'triangle', 260, 0, 0.2);
-      if (event === 'kill') this.tone(190, 0.13, 'sawtooth', 45, 0, 0.24);
-      if (event === 'damage') this.tone(100, 0.3, 'sawtooth', 25, 0, 0.45);
-      if (['start', 'wave', 'clear'].includes(event)) {
-        [440, 554, 660].forEach((frequency, i) => this.tone(frequency, 0.15, 'triangle', frequency, i * 0.085));
+      // Audio variation is independent of the simulation's random number source.
+      const variation = 0.93 + Math.random() * 0.14;
+      if (event === 'shoot') this.tone(880 * variation, 0.065 * variation, 'triangle', 260, 0, 0.18 * variation);
+      if (event === 'kill') {
+        this.tone(185 * variation, 0.13 * variation, 'sawtooth', 46, 0, 0.22);
+        this.noise(0.12, 1500, 0.18 * variation);
       }
+      if (event === 'killDiver') {
+        this.tone(470 * variation, 0.07, 'square', 700, 0, 0.1);
+        this.tone(270 * variation, 0.14 * variation, 'triangle', 58, 0.035, 0.27);
+        this.noise(0.13, 2800, 0.14 * variation);
+      }
+      if (event === 'killSpread') {
+        this.tone(105 * variation, 0.23 * variation, 'sine', 28, 0, 0.43);
+        this.tone(165 * variation, 0.15, 'triangle', 36, 0.025, 0.19);
+        this.noise(0.23, 700, 0.3 * variation);
+      }
+      if (event === 'damage') {
+        this.tone(83, 0.3, 'sawtooth', 31, 0, 0.36);
+        this.tone(65, 0.17, 'square', 43, 0.15, 0.16);
+        this.noise(0.18, 470, 0.18);
+      }
+      if (event === 'start' || event === 'wave') {
+        [330, 440].forEach((frequency, i) => this.tone(frequency, 0.13, 'triangle', frequency, i * 0.12, 0.2));
+      }
+      if (event === 'clear') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((frequency, i) => this.tone(frequency, i === 3 ? 0.29 : 0.12, 'triangle', frequency, i * 0.085, 0.22));
+        this.tone(523.25, 0.26, 'sine', 523.25, 0.255, 0.17);
+      }
+      if (event === 'powerup') {
+        [660, 990, 1320].forEach((frequency, i) => this.tone(frequency, 0.16, 'sine', frequency * 1.15, i * 0.065, 0.25));
+      }
+      if (event === 'powerupEnding') {
+        [880, 660].forEach((frequency, i) => this.tone(frequency, 0.09, 'sine', frequency, i * 0.14, 0.14));
+      }
+      if (event === 'powerupExpired') this.tone(440, 0.17, 'triangle', 220, 0, 0.16);
       if (event === 'gameover') {
-        [330, 260, 165].forEach((frequency, i) => this.tone(frequency, 0.24, 'triangle', frequency, i * 0.16));
+        [330, 260, 165].forEach((frequency, i) => this.tone(frequency, 0.24, 'triangle', frequency, i * 0.16, 0.25));
       }
     }
 
+    stopVoices(musicOnly = false) {
+      for (const voice of [...this.voices]) {
+        if (musicOnly && !voice.music) continue;
+        try { voice.source.stop(); } catch (_) {}
+      }
+      this.musicStep = -1;
+    }
+
+    reset() { this.stopVoices(); }
+
     silence(paused) {
-      if (this.master) this.master.gain.setTargetAtTime(muted || paused ? 0 : 0.14, this.context.currentTime, 0.02);
+      if (!this.master) return;
+      if (muted || paused) this.stopVoices();
+      const time = this.context.currentTime;
+      this.master.gain.cancelScheduledValues(time);
+      this.master.gain.setTargetAtTime(muted || paused ? 0 : 0.14, time, 0.008);
+    }
+
+    update(time, stage) {
+      if (!this.context || muted || game.paused || stage !== 'playing') {
+        if (this.musicStep !== -1) this.stopVoices(true);
+        return;
+      }
+      // A quiet six-second motif follows game time; pausing never queues a backlog.
+      const step = Math.floor(time / 0.375);
+      if (step === this.musicStep) return;
+      this.musicStep = step;
+      const notes = [220, 0, 330, 0, 392, 0, 330, 0, 196, 0, 293.66, 0, 349.23, 0, 293.66, 0];
+      const note = notes[step % notes.length];
+      if (note) this.tone(note, 0.28, 'triangle', note, 0, 0.035, true);
+      if (step % 4 === 0) {
+        const bass = step % 16 < 8 ? 110 : 98;
+        this.tone(bass, 0.38, 'sine', bass, 0, 0.045, true);
+      }
     }
   }
 
@@ -105,6 +195,7 @@
   function start() {
     keys.clear();
     sound.unlock();
+    sound.reset();
     sound.silence(false);
     game.start();
     updateUi();
@@ -191,6 +282,7 @@
       try { localStorage.setItem('space-attack-best', String(best)); } catch (_) {}
     }
     for (const event of game.events.splice(0)) sound.play(event);
+    sound.update(game.time, game.stage);
     updateUi();
     if (previousStage !== game.stage && game.stage === 'gameover') {
       keys.clear();
