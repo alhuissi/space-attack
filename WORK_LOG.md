@@ -59,3 +59,9 @@ The first complete playable version was running by approximately **13:38 +08:00*
 - Wave 3: whether the fan warning and post-volley gap feel fair, particularly near the sides and while moving upward.
 - Wave 5 onward: whether two divers plus occasional fans feel engaging without becoming crowded. Pause mid-attack and resume during the run; restart after a loss to confirm the experience stays clean.
 - No known gameplay blockers. Timing and later-wave balance still need the user's subjective playtest.
+
+## Combat feedback, wave variety, and twin-shot polish
+
+- Start: **2026-10-08 14:25:44 +08:00** (2026-10-08 06:25:44 UTC).
+- End: pending.
+- Scope: distinct synthesized feedback, restrained visual effects, varied wave compositions and paced difficulty, one temporary twin-shot pickup, focused tests and browser inspection. Optional procedural music follows the required work; deployment and reflection remain for the user-requested next steps.

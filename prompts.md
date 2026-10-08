@@ -56,3 +56,38 @@ Maintain reliable wave progression: diving enemies still count as living enemies
 Aim for a focused 20–25 minute implementation. Verify wave completion with divers active, scoring, collision damage, pause/resume and complete restart cleanup. Add focused tests for the new behavior and run the existing tests.
 
 Make small, focused commits. Save this exact prompt in prompts.md. Report what changed, what you verified and what I should personally playtest next. Leave deployment for later.
+
+## Prompt 3 — 2026-10-08
+
+Polish Space Attack after my latest personal playtest. The game works, and the new enemy behaviors are a good foundation. Improve combat feel, variety and progression within a focused 25-minute pass.
+
+Priorities, in order:
+
+1. Sound and visual feedback
+
+- Give ordinary kills, diver kills, spread-shooter kills, player damage and wave completion distinct synthesized sounds.
+- Add subtle variation so repeated shooting and explosions do not sound identical.
+- Improve muzzle flashes, explosions and damage feedback while keeping bullets and enemies readable. Use restrained effects that preserve control responsiveness.
+- Keep mute working for all audio.
+
+2. Enemy variety and difficulty
+
+- Vary formation layouts and role combinations between waves instead of repeating the same rows.
+- Make the first few waves clearly progress from introductory combat to meaningful dodging and combined threats.
+- Tune existing dive and spread timings from actual playtesting. Preserve warnings, repositioning gaps and sensible caps.
+- Keep later waves challenging without relying solely on faster bullets or constant firing.
+
+3. One power-up
+
+- Add a clearly identifiable pickup that occasionally drops from destroyed enemies and drifts downward.
+- Ensure the first pickup appears early enough to demonstrate the feature.
+- Collecting it grants temporary twin-shot fire for about ten seconds, with clear activation, remaining duration and expiration feedback.
+- Cap active pickups, keep them collectible through wave transitions, and reset all pickup and weapon state on restart.
+
+If those priorities are complete and time remains, add a quiet, short procedural music loop that supports the action. Keep effects audible and stop or suspend music appropriately on pause and game over. Use code-generated audio only.
+
+Preserve the current controls, screens and overall presentation. Keep the implementation small and dependency-free.
+
+Verify new weapon collisions and scoring, power-up collection and expiration, wave transitions, pause/resume, mute and complete restart cleanup. Run existing tests and add focused coverage for the new power-up state. Personally inspect the updated presentation if browser tools are available.
+
+Make small, focused commits and save this exact prompt in prompts.md. Report completed changes, verification and anything unfinished. Leave deployment for the next step and leave the reflection to me.
