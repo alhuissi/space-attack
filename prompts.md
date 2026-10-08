@@ -91,3 +91,7 @@ Preserve the current controls, screens and overall presentation. Keep the implem
 Verify new weapon collisions and scoring, power-up collection and expiration, wave transitions, pause/resume, mute and complete restart cleanup. Run existing tests and add focused coverage for the new power-up state. Personally inspect the updated presentation if browser tools are available.
 
 Make small, focused commits and save this exact prompt in prompts.md. Report completed changes, verification and anything unfinished. Leave deployment for the next step and leave the reflection to me.
+
+## Prompt 4 — 2026-10-08
+
+Now deploy to Codex sites, return the hosted URL and explain how to give the reviewers access. Save this prompt in prompts.md.

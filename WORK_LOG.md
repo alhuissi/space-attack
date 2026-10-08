@@ -85,3 +85,9 @@ The first complete playable version was running by approximately **13:38 +08:00*
 ### Remaining
 
 - All requested features, including optional music, are implemented. No known gameplay blockers. The audio mix was checked structurally and through browser execution, but its perceived sound was not auditioned. Subjective balance, audio preferences, and reflection remain with the user. Deployment was left for the next step.
+
+## Codex Sites deployment
+
+- Start: **2026-10-08 14:46:28 +08:00** (2026-10-08 06:46:28 UTC).
+- End: pending.
+- Scope: publish the finished game through Codex Sites, verify deployment status, and document reviewer access without changing the audience or inviting anyone.
