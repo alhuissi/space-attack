@@ -368,7 +368,6 @@
         else if (shooter.telegraph <= 0) {
           const dx = clamp(this.player.x - shooter.x, -340, 340);
           const dy = Math.max(90, this.player.y - shooter.y);
-          const length = Math.hypot(dx, dy);
           const speed = this.difficulty.bulletSpeed;
           const spread = shooter.attack === 'spread';
           const aim = Math.atan2(dy, dx);
