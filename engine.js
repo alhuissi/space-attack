@@ -112,7 +112,10 @@
           if (pattern === 2 && col === 3) continue;
           if (pattern === 3 && row === 1 && (col === 0 || col === 6)) continue;
           const baseX = WIDTH / 2 + (col - 3) * (pattern === 1 ? 68 : 72);
-          const baseY = pattern === -1 ? 122 + row * 52 : pattern === 0 ? 106 + row * 46 + Math.abs(col - 3) * 10 : pattern === 3 ? 102 + row * 50 + Math.abs(col - 3) * (row === 1 ? 0 : 10) : 106 + row * 48 + (pattern === 2 && col > 3 ? 12 : 0);
+          let baseY = 122 + row * 52;
+          if (pattern === 0) baseY = 106 + row * 46 + Math.abs(col - 3) * 10;
+          else if (pattern === 3) baseY = 102 + row * 50 + Math.abs(col - 3) * (row === 1 ? 0 : 10);
+          else if (pattern === 1 || pattern === 2) baseY = 106 + row * 48 + (pattern === 2 && col > 3 ? 12 : 0);
           const type = this.wave <= 2 ? row % 3 : [0, 1, 0, 2, 1][(col + row * 2 + this.wave) % 5];
           const role = type === 1 && this.wave >= 2 ? 'diver' : type === 2 && this.wave >= 3 ? 'spread' : 'formation';
           this.enemies.push({ x: baseX, y: baseY, baseX, baseY, width: 36, height: 26, row, col, type, role, alive: true, state: 'formation', attack: null, telegraph: 0, muzzleFlash: 0, attackCooldown: 0, dive: null, heading: 0, trail: [] });
