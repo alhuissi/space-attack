@@ -31,3 +31,9 @@ The first complete playable version was running by approximately **13:38 +08:00*
 - A keyboard is required; touch controls are outside this version's scope.
 - Late-wave difficulty has capped values and automated coverage, but its balance awaits the user's playtesting.
 - No known gameplay blockers at delivery.
+
+## Enemy behavior and difficulty pass
+
+- Start: **2026-10-08 14:00:36 +08:00** (2026-10-08 06:00:36 UTC).
+- End: pending.
+- Scope: distinct formation/diver/spread behaviors, gradual introductions, readable warnings and attack gaps, reliable diver return and wave completion, focused regression coverage. Deployment remains for later.
