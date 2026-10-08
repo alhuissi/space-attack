@@ -105,6 +105,7 @@ test('destroying an enemy awards points exactly once', () => {
 test('a fast player shot hits a crossed enemy between animation frames', () => {
   const game = playing();
   const enemy = game.enemies[0];
+  game.enemies = [enemy];
   game.playerBullets.push({
     x: enemy.x, y: enemy.y + 80, prevX: enemy.x, prevY: enemy.y + 80,
     vx: 0, vy: -3200, radius: 3,
@@ -112,6 +113,22 @@ test('a fast player shot hits a crossed enemy between animation frames', () => {
   game.update(0.05);
   assert.equal(enemy.alive, false);
   assert.ok(game.score > 0);
+  assert.equal(game.playerBullets.length, 0);
+});
+
+test('a shot crossing two enemies destroys the nearer one regardless of array order', () => {
+  const game = playing();
+  const upper = game.enemies.find(enemy => enemy.row === 0 && enemy.col === 0);
+  const lower = game.enemies.find(enemy => enemy.row === 1 && enemy.col === 0);
+  game.enemies = [upper, lower]; // The farther target is deliberately listed first.
+  game.playerBullets.push({
+    x: lower.x, y: lower.y + 80, prevX: lower.x, prevY: lower.y + 80,
+    vx: 0, vy: -3200, radius: 3,
+  });
+  game.update(0.05);
+  assert.equal(lower.alive, false);
+  assert.equal(upper.alive, true);
+  assert.equal(game.score, 100);
   assert.equal(game.playerBullets.length, 0);
 });
 

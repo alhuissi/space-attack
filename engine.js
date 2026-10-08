@@ -7,12 +7,20 @@
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   // Swept collision prevents fast shots from passing through a target between frames.
-  function segmentHitsCircle(shot, x, y, radius) {
+  function segmentHitTime(shot, x, y, radius) {
     const dx = shot.x - shot.prevX;
     const dy = shot.y - shot.prevY;
-    const lengthSquared = dx * dx + dy * dy;
-    const t = lengthSquared ? clamp(((x - shot.prevX) * dx + (y - shot.prevY) * dy) / lengthSquared, 0, 1) : 0;
-    return Math.hypot(shot.prevX + t * dx - x, shot.prevY + t * dy - y) <= radius;
+    const ox = shot.prevX - x;
+    const oy = shot.prevY - y;
+    const a = dx * dx + dy * dy;
+    const c = ox * ox + oy * oy - radius * radius;
+    if (c <= 0) return 0;
+    if (a === 0) return Infinity;
+    const b = 2 * (ox * dx + oy * dy);
+    const discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) return Infinity;
+    const t = (-b - Math.sqrt(discriminant)) / (2 * a);
+    return t >= 0 && t <= 1 ? t : Infinity;
   }
 
   class Game {
@@ -161,16 +169,21 @@
       }
 
       for (const shot of this.playerBullets) {
+        let target = null;
+        let firstHit = Infinity;
         for (const enemy of alive) {
-          if (enemy.alive && segmentHitsCircle(shot, enemy.x, enemy.y, 18 + shot.radius)) {
-            this.killEnemy(enemy);
-            shot.dead = true;
-            break;
+          if (enemy.alive) {
+            const hit = segmentHitTime(shot, enemy.x, enemy.y, 18 + shot.radius);
+            if (hit < firstHit) { firstHit = hit; target = enemy; }
           }
+        }
+        if (target) {
+          this.killEnemy(target);
+          shot.dead = true;
         }
       }
       for (const shot of this.enemyBullets) {
-        if (segmentHitsCircle(shot, this.player.x, this.player.y, this.player.radius + shot.radius)) {
+        if (segmentHitTime(shot, this.player.x, this.player.y, this.player.radius + shot.radius) !== Infinity) {
           shot.dead = true;
           this.hitPlayer();
         }
